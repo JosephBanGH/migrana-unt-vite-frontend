@@ -1,8 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import AppDB from './AppDB.jsx'
+import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <AppDB />
+  <StrictMode>
+    <App />
+  </StrictMode>,
 )
