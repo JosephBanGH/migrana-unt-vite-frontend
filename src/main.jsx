@@ -4,7 +4,5 @@ import './index.css'
 import AppDB from './AppDB.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <>
-    <AppDB />
-  </>,
+  <AppDB />
 )

@@ -242,7 +242,7 @@ const AppDB = () => {
     if (!currentSession) return;
 
     setShowAIConsult(true);
-    setLoadingAI(true);
+    // setLoadingAI(true);
     setError(null);
 
     try {
@@ -270,15 +270,15 @@ const AppDB = () => {
       });
 
       // Actualizar sesión con respuestas de IA
-      setCurrentSession({
-        ...currentSession,
+      setCurrentSession(prev => ({
+        ...prev,
         diagnostico_ia_1: response.ia1?.diagnostico,
         tratamiento_ia_1: response.ia1?.tratamiento,
         confianza_ia_1: response.ia1?.confianza,
         diagnostico_ia_2: response.ia2?.diagnostico,
         tratamiento_ia_2: response.ia2?.tratamiento,
         confianza_ia_2: response.ia2?.confianza
-      });
+      }));
 
     } catch (err) {
       setError('Error al consultar IAs: ' + err.message);
@@ -313,19 +313,19 @@ const AppDB = () => {
       es_tratamiento_final: false
     };
 
-    setCurrentSession({
-      ...currentSession,
+    setCurrentSession(prev => ({
+      ...prev,
       tratamientos_prescritos: [...(currentSession.tratamientos_prescritos || []), newTreatment]
-    });
+    }));
   };
 
   const handleRemoveTreatment = (index) => {
     const updated = [...currentSession.tratamientos_prescritos];
     updated.splice(index, 1);
-    setCurrentSession({
-      ...currentSession,
+    setCurrentSession(prev => ({
+      ...prev,
       tratamientos_prescritos: updated
-    });
+    }));
   };
 
   const handleSetFinalTreatment = (index) => {
@@ -333,10 +333,10 @@ const AppDB = () => {
       ...t,
       es_tratamiento_final: i === index
     }));
-    setCurrentSession({
-      ...currentSession,
+    setCurrentSession(prev => ({
+      ...prev,
       tratamientos_prescritos: updated
-    });
+    }));
   };
 
   // ========================================
@@ -381,13 +381,24 @@ const AppDB = () => {
   // ========================================
   // VISTAS
   // ========================================
-
+  const handleNewPatient = () => {
+  const newPatient = {
+    codigo_paciente: `P${String(patients.length + 1).padStart(3, '0')}`,
+    nombre_completo: '',
+    genero: 'Femenino',
+    fecha_nacimiento: '',
+    correo_electronico: '',
+    telefono: ''
+  };
+  // Aquí podrías abrir un modal o formulario
+  alert('Funcionalidad de nuevo paciente por implementar');
+};
   // Vista de Pacientes
   const PatientsView = () => (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Pacientes</h2>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        <button onClick={handleNewPatient} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
           <Plus size={20} />
           Nuevo Paciente
         </button>
@@ -425,6 +436,28 @@ const AppDB = () => {
       )}
     </div>
   );
+  
+  const SessionEditor = React.memo(function SessionEditor({
+    session,
+    setSession
+  }) {
+    if (!session) return null;
+
+    return (
+      <input
+        type="text"
+        defaultValue={session.tipo_migrana}
+        onBlur={e =>
+          setSession(prev => ({
+            ...prev,
+            tipo_migrana: e.target.value
+          }))
+        }
+        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        placeholder="Ej: Migraña episódica sin aura"
+      />
+    );
+  });
 
   // Vista de Sesiones
   const SessionsView = () => (
@@ -481,10 +514,10 @@ const AppDB = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Sesión</label>
                 <input
                   type="date"
-                  value={currentSession.fecha_sesion}
-                  onChange={(e) => {
+                  defaultValue={currentSession.fecha_sesion}
+                  onBlur={(e) => {
                     const value = e.target.value;
-                    setCurrentSession({...currentSession, fecha_sesion: e.target.value})}
+                    setCurrentSession(prev => ({...prev, fecha_sesion: value}))}
                   }className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -492,10 +525,10 @@ const AppDB = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Sesión</label>
                 <select
-                  value={currentSession.tipo_sesion}
-                  onChange={(e) => {
+                  defaultValue={currentSession.tipo_sesion}
+                  onBlur={(e) => {
                     const value = e.target.value;
-                    setCurrentSession({...currentSession, tipo_sesion: e.target.value})}
+                    setCurrentSession(prev => ({...prev, tipo_sesion: value}))}
                   }className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="Inicial">Inicial</option>
@@ -516,13 +549,14 @@ const AppDB = () => {
                     type="range"
                     min="1"
                     max="10"
-                    value={currentSession.kpis.intensidad_dolor}
-                    onChange={(e) => {
+                    defaultValue={currentSession.kpis.intensidad_dolor}
+                    onBlur={(e) => {
                       const value = e.target.value;
-                      setCurrentSession({
-                      ...currentSession,
-                      kpis: {...currentSession.kpis, intensidad_dolor: parseInt(e.target.value)}
-                    })}}
+                      setCurrentSession(prev =>({
+                        ...prev,
+                        kpis: {...prev.kpis, intensidad_dolor: value}
+                      }));
+                    }}
                     className="w-full"
                   />
                   <div className="text-center text-2xl font-bold text-blue-600">
@@ -536,13 +570,14 @@ const AppDB = () => {
                     type="number"
                     min="0"
                     max="31"
-                    value={currentSession.kpis.frecuencia_episodios}
-                    onChange={(e) => {
+                    defaultValue={currentSession.kpis.frecuencia_episodios}
+                    onBlur={(e) => {
                       const value = e.target.value;
-                      setCurrentSession({
-                      ...currentSession,
-                      kpis: {...currentSession.kpis, frecuencia_episodios: parseInt(e.target.value) || 0}
-                    })}}
+                      setCurrentSession(prev =>({
+                        ...prev,
+                        kpis: {...prev.kpis, frecuencia_episodios: value || 0}
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
@@ -552,13 +587,14 @@ const AppDB = () => {
                   <input
                     type="number"
                     min="0"
-                    value={currentSession.kpis.duracion_horas}
-                    onChange={(e) => {
+                    defaultValue={currentSession.kpis.duracion_horas}
+                    onBlur={(e) => {
                       const value = e.target.value;
-                      setCurrentSession({
-                      ...currentSession,
-                      kpis: {...currentSession.kpis, duracion_horas: parseInt(e.target.value) || 0}
-                    })}}
+                      setCurrentSession(prev =>({
+                        ...prev,
+                        kpis: {...prev.kpis, duracion_horas: value || 0}
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
@@ -566,13 +602,14 @@ const AppDB = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nivel de Discapacidad</label>
                   <select
-                    value={currentSession.kpis.nivel_discapacidad}
-                    onChange={(e) => {
+                    defaultValue={currentSession.kpis.nivel_discapacidad}
+                    onBlur={(e) => {
                       const value = e.target.value;
-                      setCurrentSession({
-                      ...currentSession,
-                      kpis: {...currentSession.kpis, nivel_discapacidad: e.target.value}
-                    })}}
+                      setCurrentSession(prev =>({
+                        ...prev,
+                        kpis: {...prev.kpis, nivel_discapacidad: value}
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   >
                     <option value="Leve">Leve</option>
@@ -587,13 +624,14 @@ const AppDB = () => {
                     type="number"
                     min="1"
                     max="10"
-                    value={currentSession.kpis.puntaje_calidad_vida}
-                    onChange={(e) => {
+                    defaultValue={currentSession.kpis.puntaje_calidad_vida}
+                    onBlur={(e) => {
                       const value = e.target.value;
-                      setCurrentSession({
-                      ...currentSession,
-                      kpis: {...currentSession.kpis, puntaje_calidad_vida: parseInt(e.target.value) || 5}
-                    })}}
+                      setCurrentSession(prev =>({
+                        ...prev,
+                        kpis: {...prev.kpis, puntaje_calidad_vida: value || 5}
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
@@ -603,13 +641,14 @@ const AppDB = () => {
                   <input
                     type="number"
                     min="0"
-                    value={currentSession.kpis.dias_trabajo_perdidos}
-                    onChange={(e) => {
+                    defaultValue={currentSession.kpis.dias_trabajo_perdidos}
+                    onBlur={(e) => {
                       const value = e.target.value;
-                      setCurrentSession({
-                      ...currentSession,
-                      kpis: {...currentSession.kpis, dias_trabajo_perdidos: parseInt(e.target.value) || 0}
-                    })}}
+                      setCurrentSession(prev =>({
+                        ...prev,
+                        kpis: {...prev.kpis, dias_trabajo_perdidos: value || 0}
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
@@ -619,15 +658,9 @@ const AppDB = () => {
             {/* Diagnóstico */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Migraña</label>
-              <input
-                type="text"
-                value={currentSession.tipo_migrana}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setCurrentSession({...currentSession, tipo_migrana: e.target.value})}
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder="Ej: Migraña episódica sin aura"
+              <SessionEditor
+                session={currentSession}
+                setSession={setCurrentSession}
               />
             </div>
 
@@ -635,11 +668,11 @@ const AppDB = () => {
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={currentSession.aura_presente}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCurrentSession({...currentSession, aura_presente: e.target.checked})}
-                  }
+                  defaultChecked={currentSession.aura_presente}
+                  onBlur={(e) => {
+                    const checked = e.target.checked;
+                    setCurrentSession(prev =>({...prev, aura_presente: checked}))
+                  }}
                   className="w-4 h-4"
                 />
                 <span className="text-sm text-gray-700">Aura Presente</span>
@@ -648,11 +681,11 @@ const AppDB = () => {
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={currentSession.condicion_cronica}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCurrentSession({...currentSession, condicion_cronica: e.target.checked})}
-                  }
+                  defaultChecked={currentSession.condicion_cronica}
+                  onBlur={(e) => {
+                    const checked = e.target.checked;
+                    setCurrentSession(prev =>({...prev, condicion_cronica: checked}))
+                  }}
                   className="w-4 h-4"
                 />
                 <span className="text-sm text-gray-700">Condición Crónica</span>
@@ -662,10 +695,10 @@ const AppDB = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Diagnóstico Final del Médico</label>
               <textarea
-                value={currentSession.diagnostico_final}
-                onChange={(e) => {
+                defaultValue={currentSession.diagnostico_final}
+                onBlur={(e) => {
                   const value = e.target.value;
-                  setCurrentSession({...currentSession, diagnostico_final: e.target.value})}
+                  setCurrentSession(prev => ({...prev, diagnostico_final: value}))}
                 }className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 rows="3"
                 placeholder="Diagnóstico y observaciones del médico..."
@@ -678,9 +711,12 @@ const AppDB = () => {
               
               <div className="mb-3">
                 <select
-                  onChange={(e) => {const value = e.target.value;
-                    if (e.target.value) handleAddTreatment(e.target.value);
-                    e.target.value = '';
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value) {
+                      handleAddTreatment(value);
+                      e.target.value = '';
+                    }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
@@ -760,7 +796,7 @@ const AppDB = () => {
           </div>
 
           {/* Respuestas de IA */}
-          {showAIConsult && (
+          {aiResponses && (
             <div className="mt-6 space-y-4">
               <h4 className="text-lg font-semibold text-gray-800">Consulta a Inteligencia Artificial</h4>
               
@@ -968,7 +1004,7 @@ const AppDB = () => {
                     dataKey="value"
                   >
                     {getDiagnosisDistribution().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip />
