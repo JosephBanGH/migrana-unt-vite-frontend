@@ -210,8 +210,8 @@ const AppDB = () => {
       condicion_cronica: false,
       diagnostico_final: '',
       kpis: {
-        intensidad_dolor: 5,
-        frecuencia_episodios: 0,
+        metodo_pound: 5,
+        red_flat: 0,
         duracion_horas: 0,
         nivel_discapacidad: 'Moderado',
         puntaje_calidad_vida: 5,
@@ -347,8 +347,8 @@ const AppDB = () => {
     return sessions.map((s, idx) => ({
       session: `S${idx + 1}`,
       fecha: s.fecha_sesion,
-      intensidad: s.kpis?.intensidad_dolor || 0,
-      frecuencia: s.kpis?.frecuencia_episodios || 0,
+      intensidad: s.kpis?.metodo_pound || 0,
+      frecuencia: s.kpis?.red_flat || 0,
       duracion: s.kpis?.duracion_horas || 0,
       calidad_vida: s.kpis?.puntaje_calidad_vida || 0
     }));
@@ -549,18 +549,18 @@ const AppDB = () => {
                     type="range"
                     min="1"
                     max="10"
-                    defaultValue={currentSession.kpis.intensidad_dolor}
+                    defaultValue={currentSession.kpis.metodo_pound}
                     onBlur={(e) => {
                       const value = e.target.value;
                       setCurrentSession(prev =>({
                         ...prev,
-                        kpis: {...prev.kpis, intensidad_dolor: value}
+                        kpis: {...prev.kpis, metodo_pound: value}
                       }));
                     }}
                     className="w-full"
                   />
                   <div className="text-center text-2xl font-bold text-blue-600">
-                    {currentSession.kpis.intensidad_dolor}/10
+                    {currentSession.kpis.metodo_pound}/10
                   </div>
                 </div>
 
@@ -570,12 +570,12 @@ const AppDB = () => {
                     type="number"
                     min="0"
                     max="31"
-                    defaultValue={currentSession.kpis.frecuencia_episodios}
+                    defaultValue={currentSession.kpis.red_flat}
                     onBlur={(e) => {
                       const value = e.target.value;
                       setCurrentSession(prev =>({
                         ...prev,
-                        kpis: {...prev.kpis, frecuencia_episodios: value || 0}
+                        kpis: {...prev.kpis, red_flat: value || 0}
                       }));
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -874,10 +874,10 @@ const AppDB = () => {
                     <p className="text-sm text-gray-600 mb-3">{session.diagnostico_final}</p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-600">
                       <div>
-                        <span className="font-medium">Intensidad:</span> {session.kpis?.intensidad_dolor || 0}/10
+                        <span className="font-medium">Intensidad:</span> {session.kpis?.metodo_pound || 0}/10
                       </div>
                       <div>
-                        <span className="font-medium">Frecuencia:</span> {session.kpis?.frecuencia_episodios || 0}/mes
+                        <span className="font-medium">Frecuencia:</span> {session.kpis?.red_flat || 0}/mes
                       </div>
                       <div>
                         <span className="font-medium">Duración:</span> {session.kpis?.duracion_horas || 0}h
@@ -951,7 +951,7 @@ const AppDB = () => {
             <div className="text-sm text-gray-600 mb-1">Intensidad Promedio</div>
             <div className="text-2xl font-bold text-red-600">
               {sessions.length > 0
-                ? (sessions.reduce((acc, s) => acc + (s.kpis?.intensidad_dolor || 0), 0) / sessions.length).toFixed(1)
+                ? (sessions.reduce((acc, s) => acc + (s.kpis?.metodo_pound || 0), 0) / sessions.length).toFixed(1)
                 : 0}/10
             </div>
           </div>
